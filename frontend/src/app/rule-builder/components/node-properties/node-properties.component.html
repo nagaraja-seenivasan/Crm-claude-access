@@ -1,0 +1,256 @@
+<div class="props-container">
+  <div class="props-header">
+    <i class="pi pi-sliders-h"></i>
+    <span>Node Properties</span>
+  </div>
+
+  <!-- Label -->
+  <div class="props-field">
+    <label class="props-label">Label</label>
+    <input pInputText class="w-full" [value]="node.label"
+           (change)="onLabelChange(($event.target as HTMLInputElement).value)" />
+  </div>
+
+  <p-divider></p-divider>
+
+  <!-- ── TRIGGER ──────────────────────────────────────────────────── -->
+  @if (nodeType === 'trigger') {
+    <div class="props-section-title">Trigger Configuration</div>
+
+    <div class="props-field">
+      <label class="props-label">Trigger Type</label>
+      <p-dropdown
+        [options]="triggerTypeOptions"
+        [(ngModel)]="triggerData.triggerType"
+        (ngModelChange)="onTriggerChange()"
+        optionLabel="label" optionValue="value"
+        styleClass="w-full" appendTo="body">
+      </p-dropdown>
+    </div>
+
+    <div class="props-field">
+      <label class="props-label">Entity Type</label>
+      <p-dropdown
+        [options]="entityTypeOptions"
+        [(ngModel)]="triggerData.entityType"
+        (ngModelChange)="onTriggerChange()"
+        optionLabel="label" optionValue="value"
+        placeholder="Select entity"
+        styleClass="w-full" appendTo="body">
+      </p-dropdown>
+    </div>
+
+    @if (triggerData.triggerType === 'SQS') {
+      <div class="props-field">
+        <label class="props-label">SQS Queue Name</label>
+        <input pInputText class="w-full" placeholder="my-crm-queue"
+               [(ngModel)]="triggerData.sqsQueueName"
+               (ngModelChange)="onTriggerChange()" />
+      </div>
+    }
+  }
+
+  <!-- ── CONDITION ────────────────────────────────────────────────── -->
+  @if (nodeType === 'condition') {
+    <div class="props-section-title">Condition</div>
+
+    <!-- Primary clause -->
+    <div class="props-field">
+      <label class="props-label">Field</label>
+      <p-dropdown
+        [options]="fieldOptions"
+        [(ngModel)]="conditionData.field"
+        (ngModelChange)="onConditionChange()"
+        optionLabel="label" optionValue="value"
+        placeholder="Select field" [filter]="true"
+        styleClass="w-full" appendTo="body">
+      </p-dropdown>
+    </div>
+
+    <div class="props-field">
+      <label class="props-label">Operator</label>
+      <p-dropdown
+        [options]="operatorOptions"
+        [(ngModel)]="conditionData.operator"
+        (ngModelChange)="onConditionChange()"
+        optionLabel="label" optionValue="value"
+        styleClass="w-full" appendTo="body">
+      </p-dropdown>
+    </div>
+
+    @if (operatorNeedsValue(conditionData.operator)) {
+      <div class="props-field">
+        <label class="props-label">Value</label>
+        <input pInputText class="w-full" placeholder="Compare value"
+               [ngModel]="conditionData.value"
+               (ngModelChange)="conditionData.value = $event; onConditionChange()" />
+      </div>
+    }
+
+    <!-- Multi-clause section -->
+    @if ((conditionData.conditions?.length ?? 0) > 0) {
+      <p-divider></p-divider>
+      <div class="props-field">
+        <label class="props-label">Combine clauses with</label>
+        <p-selectButton
+          [options]="logicalOperatorOptions"
+          [(ngModel)]="conditionData.logicalOperator"
+          (ngModelChange)="onConditionChange()"
+          optionLabel="label" optionValue="value">
+        </p-selectButton>
+      </div>
+
+      @for (clause of conditionData.conditions; track trackByIndex($index)) {
+        <div class="props-clause">
+          <div class="props-clause-row">
+            <p-dropdown
+              [options]="fieldOptions" [(ngModel)]="clause.field"
+              (ngModelChange)="updateClause($index, clause)"
+              placeholder="Field" optionLabel="label" optionValue="value"
+              styleClass="flex-1" appendTo="body">
+            </p-dropdown>
+            <p-dropdown
+              [options]="operatorOptions" [(ngModel)]="clause.operator"
+              (ngModelChange)="updateClause($index, clause)"
+              optionLabel="label" optionValue="value"
+              styleClass="w-7rem" appendTo="body">
+            </p-dropdown>
+            <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm"
+                    (click)="removeClause($index)"></button>
+          </div>
+          @if (operatorNeedsValue(clause.operator)) {
+            <input pInputText class="w-full mt-1" placeholder="Value"
+                   [(ngModel)]="clause.value"
+                   (ngModelChange)="updateClause($index, clause)" />
+          }
+        </div>
+      }
+    }
+
+    <button pButton icon="pi pi-plus" label="Add clause" class="p-button-text p-button-sm mt-1"
+            (click)="addClause()"></button>
+  }
+
+  <!-- ── SET VALUE ─────────────────────────────────────────────────── -->
+  @if (nodeType === 'set-value') {
+    <div class="props-section-title">Field Assignments</div>
+
+    @for (a of setValueData.assignments; track trackByIndex($index)) {
+      <div class="props-assignment">
+        <div class="props-assignment-header">
+          <span class="props-assign-num">#{{ $index + 1 }}</span>
+          <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm"
+                  (click)="removeAssignment($index)"></button>
+        </div>
+        <div class="props-field">
+          <label class="props-label">Target Field</label>
+          <p-dropdown
+            [options]="fieldOptions" [(ngModel)]="a.targetField"
+            (ngModelChange)="onSetValueChange()"
+            placeholder="Choose field" optionLabel="label" optionValue="value"
+            styleClass="w-full" appendTo="body">
+          </p-dropdown>
+        </div>
+        <div class="props-field">
+          <label class="props-label">
+            Value
+            <p-toggleButton
+              [(ngModel)]="a.isExpression"
+              (ngModelChange)="onSetValueChange()"
+              onLabel="Expression" offLabel="Literal"
+              onIcon="pi pi-code" offIcon="pi pi-pencil"
+              styleClass="p-button-sm ml-2">
+            </p-toggleButton>
+          </label>
+          <input pInputText class="w-full"
+                 [placeholder]="a.isExpression ? '{{field}} or template string' : 'Literal value'"
+                 [ngModel]="a.value"
+                 (ngModelChange)="a.value = $event; onSetValueChange()" />
+        </div>
+      </div>
+    }
+
+    <button pButton icon="pi pi-plus" label="Add assignment" class="p-button-text p-button-sm mt-1"
+            (click)="addAssignment()"></button>
+
+    <p-divider></p-divider>
+
+    <div class="props-field">
+      <div class="flex align-items-center gap-2">
+        <p-inputSwitch [(ngModel)]="setValueData.saveEntity"
+                       (ngModelChange)="onSetValueChange()">
+        </p-inputSwitch>
+        <label class="props-label mb-0">Save entity after assignment</label>
+      </div>
+    </div>
+  }
+
+  <!-- ── NOTIFICATION ──────────────────────────────────────────────── -->
+  @if (nodeType === 'notification') {
+    <div class="props-section-title">Notification Configuration</div>
+
+    <div class="props-field">
+      <label class="props-label">Channel</label>
+      <p-selectButton
+        [options]="channelOptions"
+        [(ngModel)]="notificationData.channel"
+        (ngModelChange)="onNotificationChange()"
+        optionLabel="label" optionValue="value">
+      </p-selectButton>
+    </div>
+
+    <div class="props-field">
+      <label class="props-label">Template</label>
+      <p-dropdown
+        [options]="templateOptions"
+        [(ngModel)]="notificationData.templateId"
+        (ngModelChange)="onNotificationChange()"
+        placeholder="Select template" optionLabel="label" optionValue="value"
+        styleClass="w-full" appendTo="body">
+      </p-dropdown>
+    </div>
+
+    @if (notificationData.channel === 'EMAIL') {
+      <div class="props-field">
+        <label class="props-label">Subject</label>
+        <input pInputText class="w-full" placeholder="Email subject"
+               [(ngModel)]="notificationData.subject"
+               (ngModelChange)="onNotificationChange()" />
+      </div>
+    }
+
+    <div class="props-field">
+      <label class="props-label">Recipient Field</label>
+      <p-dropdown
+        [options]="fieldOptions"
+        [(ngModel)]="notificationData.recipientField"
+        (ngModelChange)="onNotificationChange()"
+        placeholder="e.g. owner.email" optionLabel="label" optionValue="value"
+        [filter]="true" styleClass="w-full" appendTo="body">
+      </p-dropdown>
+    </div>
+
+    <div class="props-field">
+      <label class="props-label">Additional Recipients</label>
+      @for (r of notificationData.additionalRecipients; track trackByIndex($index)) {
+        <div class="flex gap-1 mb-1">
+          <input pInputText class="flex-1" placeholder="email or field path"
+                 [value]="r"
+                 (change)="updateRecipient($index, ($event.target as HTMLInputElement).value)" />
+          <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm"
+                  (click)="removeRecipient($index)"></button>
+        </div>
+      }
+      <button pButton icon="pi pi-plus" label="Add" class="p-button-text p-button-sm"
+              (click)="addRecipient()"></button>
+    </div>
+  }
+
+  <!-- ── END ──────────────────────────────────────────────────────── -->
+  @if (nodeType === 'end') {
+    <div class="props-end-hint">
+      <i class="pi pi-stop-circle"></i>
+      <p>This node terminates the current flow branch. No configuration needed.</p>
+    </div>
+  }
+</div>

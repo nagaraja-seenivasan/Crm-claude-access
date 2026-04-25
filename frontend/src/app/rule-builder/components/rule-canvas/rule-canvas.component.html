@@ -1,0 +1,161 @@
+<div class="rb-canvas-wrapper"
+     (dragover)="onDragOver($event)"
+     (drop)="onDrop($event)"
+     (mousedown)="onCanvasMouseDown($event)"
+     (wheel)="onCanvasWheel($event)">
+
+  <!-- Zoom Toolbar -->
+  <div class="rb-zoom-bar">
+    <p-button icon="pi pi-minus" styleClass="p-button-text p-button-sm" pTooltip="Zoom out"
+              (onClick)="zoomOut()"></p-button>
+    <span class="rb-zoom-label">{{ zoomPercent }}%</span>
+    <p-button icon="pi pi-plus" styleClass="p-button-text p-button-sm" pTooltip="Zoom in"
+              (onClick)="zoomIn()"></p-button>
+    <p-divider layout="vertical" styleClass="mx-1"></p-divider>
+    <p-button icon="pi pi-expand" styleClass="p-button-text p-button-sm" pTooltip="Reset view"
+              (onClick)="resetView()"></p-button>
+  </div>
+
+  <!-- Hint -->
+  @if (nodes.length === 0) {
+    <div class="rb-empty-hint">
+      <i class="pi pi-arrow-left"></i>
+      <span>Drag a node from the palette to start building your rule</span>
+    </div>
+  }
+
+  <!-- Scrollable inner canvas -->
+  <div class="rb-canvas-inner"
+       #canvasEl
+       [style.transform]="canvasTransform"
+       [style.transform-origin]="'0 0'">
+
+    <!-- SVG connection layer -->
+    <svg class="rb-svg-layer" [attr.width]="3200" [attr.height]="2400">
+      <defs>
+        <marker id="arrowTrue" markerWidth="8" markerHeight="6"
+                refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="var(--rb-connection-color)"/>
+        </marker>
+        <marker id="arrowFalse" markerWidth="8" markerHeight="6"
+                refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#ef4444"/>
+        </marker>
+        <marker id="arrowDefault" markerWidth="8" markerHeight="6"
+                refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#64748b"/>
+        </marker>
+      </defs>
+
+      <!-- Existing connections -->
+      @for (conn of connections; track trackById($index, conn)) {
+        <g class="rb-conn-group" (dblclick)="deleteConnection($event, conn)">
+          <path
+            [attr.d]="connectionPath(conn)"
+            fill="none"
+            [attr.stroke]="conn.label === 'FALSE' ? '#ef4444' : conn.label === 'TRUE' ? 'var(--rb-connection-color)' : '#64748b'"
+            stroke-width="2"
+            [attr.marker-end]="conn.label === 'FALSE' ? 'url(#arrowFalse)' : conn.label === 'TRUE' ? 'url(#arrowTrue)' : 'url(#arrowDefault)'"
+            class="rb-conn-path"/>
+          <!-- Hit-area (wider, invisible) -->
+          <path [attr.d]="connectionPath(conn)" fill="none" stroke="transparent" stroke-width="12"
+                class="rb-conn-hit"/>
+          @if (conn.label) {
+            <foreignObject
+              [attr.x]="connectionMidpoint(conn).x - 22"
+              [attr.y]="connectionMidpoint(conn).y - 10"
+              width="44" height="20">
+              <div xmlns="http://www.w3.org/1999/xhtml" class="rb-conn-label"
+                   [class.rb-conn-label--true]="conn.label === 'TRUE'"
+                   [class.rb-conn-label--false]="conn.label === 'FALSE'">
+                {{ conn.label }}
+              </div>
+            </foreignObject>
+          }
+        </g>
+      }
+
+      <!-- Drawing (in-progress) connection -->
+      @if (drawing) {
+        <path [attr.d]="drawingPath()" fill="none" stroke="#94a3b8"
+              stroke-width="2" stroke-dasharray="6 3"/>
+      }
+    </svg>
+
+    <!-- Nodes -->
+    @for (node of nodes; track trackById($index, node)) {
+      <div
+        class="rb-node"
+        [class]="'rb-node--' + node.type"
+        [class.rb-node--selected]="selectedNode?.id === node.id"
+        [style.left.px]="node.position.x"
+        [style.top.px]="node.position.y"
+        [style.width.px]="nodeWidth"
+        (mousedown)="onNodeMouseDown($event, node)"
+        (click)="onNodeClick($event, node)">
+
+        <!-- Input port (top) — hidden for trigger nodes -->
+        @if (node.type !== 'trigger') {
+          <div class="rb-port rb-port--input"
+               (mouseup)="onInputPortMouseUp($event, node)"
+               pTooltip="Drop connection here">
+          </div>
+        }
+
+        <!-- Node header -->
+        <div class="rb-node-header">
+          <i class="pi {{ nodeIcon(node.type) }} rb-node-icon"></i>
+          <span class="rb-node-title">{{ node.label }}</span>
+          <button class="rb-node-delete" (click)="deleteNode($event, node)"
+                  pTooltip="Delete node" tooltipPosition="top">
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+
+        <!-- Node body -->
+        <div class="rb-node-body">
+          @switch (node.type) {
+            @case ('trigger') {
+              <span class="rb-node-summary">{{ triggerSummary(node) }}</span>
+            }
+            @case ('condition') {
+              <span class="rb-node-summary">{{ conditionSummary(node) }}</span>
+            }
+            @case ('set-value') {
+              <span class="rb-node-summary">{{ setValueSummary(node) }}</span>
+            }
+            @case ('notification') {
+              <span class="rb-node-summary">{{ notificationSummary(node) }}</span>
+            }
+            @case ('end') {
+              <span class="rb-node-summary rb-node-summary--muted">Flow ends here</span>
+            }
+          }
+        </div>
+
+        <!-- Output port(s) (bottom) -->
+        @if (hasOutputPorts(node.type)) {
+          <div class="rb-ports-output">
+            @if (isCondition(node.type)) {
+              <div class="rb-port rb-port--output rb-port--false"
+                   (mousedown)="onOutputPortMouseDown($event, node, 'output-false')"
+                   pTooltip="FALSE branch">
+                <span class="rb-port-label">F</span>
+              </div>
+              <div class="rb-port rb-port--output rb-port--true"
+                   (mousedown)="onOutputPortMouseDown($event, node, 'output-true')"
+                   pTooltip="TRUE branch">
+                <span class="rb-port-label">T</span>
+              </div>
+            } @else {
+              <div class="rb-port rb-port--output"
+                   (mousedown)="onOutputPortMouseDown($event, node, 'output')"
+                   pTooltip="Connect to next node">
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

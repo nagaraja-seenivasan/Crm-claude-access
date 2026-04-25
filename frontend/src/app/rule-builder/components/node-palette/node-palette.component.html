@@ -1,0 +1,54 @@
+<div class="palette-container">
+  <div class="palette-header">
+    <i class="pi pi-objects-column"></i>
+    <span>Nodes</span>
+  </div>
+
+  <div class="palette-section">
+    <span class="palette-section-label">TRIGGERS</span>
+    @for (item of triggerItems; track item.label) {
+      <div class="palette-item palette-item--trigger"
+           draggable="true"
+           (dragstart)="onDragStart($event, item)"
+           pTooltip="{{ item.description }}" tooltipPosition="right">
+        <i class="pi {{ item.icon }}"></i>
+        <span>{{ item.label }}</span>
+      </div>
+    }
+  </div>
+
+  <p-divider></p-divider>
+
+  <div class="palette-section">
+    <span class="palette-section-label">LOGIC</span>
+    @for (item of logicItems; track item.label) {
+      <div class="palette-item palette-item--logic"
+           draggable="true"
+           (dragstart)="onDragStart($event, item)"
+           pTooltip="{{ item.description }}" tooltipPosition="right">
+        <i class="pi {{ item.icon }}"></i>
+        <span>{{ item.label }}</span>
+      </div>
+    }
+  </div>
+
+  <p-divider></p-divider>
+
+  <div class="palette-section">
+    <span class="palette-section-label">ACTIONS</span>
+    @for (item of actionItems; track item.label) {
+      <div class="palette-item palette-item--action"
+           draggable="true"
+           (dragstart)="onDragStart($event, item)"
+           pTooltip="{{ item.description }}" tooltipPosition="right">
+        <i class="pi {{ item.icon }}"></i>
+        <span>{{ item.label }}</span>
+      </div>
+    }
+  </div>
+
+  <div class="palette-footer">
+    <i class="pi pi-info-circle"></i>
+    <small>Drag nodes onto the canvas to build your rule flow</small>
+  </div>
+</div>
