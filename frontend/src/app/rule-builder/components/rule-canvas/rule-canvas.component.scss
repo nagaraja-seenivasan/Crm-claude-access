@@ -1,0 +1,267 @@
+.rb-canvas-wrapper {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  background-color: var(--rb-canvas-bg);
+  background-image: radial-gradient(circle, var(--rb-canvas-dot) 1px, transparent 1px);
+  background-size: 24px 24px;
+  cursor: default;
+  user-select: none;
+}
+
+.rb-zoom-bar {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: white;
+  border: 1px solid var(--rb-node-border);
+  border-radius: 8px;
+  padding: 4px 8px;
+  z-index: 20;
+  box-shadow: var(--rb-node-shadow);
+}
+
+.rb-zoom-label {
+  font-size: 0.75rem;
+  color: #64748b;
+  min-width: 36px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.rb-empty-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  pointer-events: none;
+  z-index: 5;
+
+  i {
+    font-size: 1.2rem;
+    animation: hint-pulse 2s ease-in-out infinite;
+  }
+}
+
+@keyframes hint-pulse {
+  0%, 100% { opacity: 0.4; transform: translateX(0); }
+  50% { opacity: 1; transform: translateX(-6px); }
+}
+
+.rb-canvas-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3200px;
+  height: 2400px;
+  transform-origin: 0 0;
+}
+
+.rb-svg-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.rb-conn-group {
+  pointer-events: all;
+  cursor: pointer;
+
+  &:hover .rb-conn-path {
+    stroke-width: 3;
+    opacity: 0.85;
+  }
+}
+
+.rb-conn-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+  border-radius: 3px;
+  padding: 1px 4px;
+  background: white;
+  border: 1px solid currentColor;
+
+  &--true { color: var(--rb-connection-color); }
+  &--false { color: #ef4444; }
+}
+
+// ── Nodes ────────────────────────────────────────────────────────────────────
+
+.rb-node {
+  position: absolute;
+  background: var(--rb-node-bg);
+  border: 1.5px solid var(--rb-node-border);
+  border-radius: 10px;
+  box-shadow: var(--rb-node-shadow);
+  z-index: 10;
+  cursor: grab;
+  transition: box-shadow 0.15s, border-color 0.15s;
+  min-height: 100px;
+
+  &:active { cursor: grabbing; }
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  &--selected {
+    border-color: var(--rb-node-selected-border) !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2), var(--rb-node-shadow);
+  }
+
+  // Accent left-border by node type
+  &--trigger   { border-left: 4px solid var(--rb-node-trigger-accent); }
+  &--condition { border-left: 4px solid var(--rb-node-condition-accent); }
+  &--set-value { border-left: 4px solid var(--rb-node-setvalue-accent); }
+  &--notification { border-left: 4px solid var(--rb-node-notification-accent); }
+  &--end       { border-left: 4px solid var(--rb-node-end-accent); }
+}
+
+.rb-node-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px 6px;
+  border-bottom: 1px solid var(--rb-node-border);
+}
+
+.rb-node-icon {
+  font-size: 0.85rem;
+  flex-shrink: 0;
+
+  .rb-node--trigger &   { color: var(--rb-node-trigger-accent); }
+  .rb-node--condition & { color: var(--rb-node-condition-accent); }
+  .rb-node--set-value & { color: var(--rb-node-setvalue-accent); }
+  .rb-node--notification & { color: var(--rb-node-notification-accent); }
+  .rb-node--end &       { color: var(--rb-node-end-accent); }
+}
+
+.rb-node-title {
+  flex: 1;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rb-node-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #94a3b8;
+  padding: 0;
+  flex-shrink: 0;
+
+  &:hover {
+    background: #fee2e2;
+    color: #ef4444;
+  }
+
+  i { font-size: 0.65rem; }
+}
+
+.rb-node-body {
+  padding: 8px 10px 10px;
+}
+
+.rb-node-summary {
+  font-size: 0.72rem;
+  color: #64748b;
+  display: block;
+  line-height: 1.4;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &--muted { color: #cbd5e1; font-style: italic; }
+}
+
+// ── Ports ────────────────────────────────────────────────────────────────────
+
+.rb-port {
+  position: absolute;
+  width: var(--rb-port-size);
+  height: var(--rb-port-size);
+  border-radius: 50%;
+  background: white;
+  border: 2px solid var(--rb-port-color);
+  z-index: 15;
+  cursor: crosshair;
+
+  &--input {
+    top: calc(-1 * var(--rb-port-size) / 2 - 1px);
+    left: 50%;
+    transform: translateX(-50%);
+
+    &:hover {
+      background: var(--rb-port-color);
+      transform: translateX(-50%) scale(1.3);
+    }
+  }
+}
+
+.rb-ports-output {
+  position: absolute;
+  bottom: calc(-1 * var(--rb-port-size) / 2);
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.rb-port--output {
+  position: relative;
+  flex-shrink: 0;
+  margin: 0 8px;
+
+  &:hover {
+    background: var(--rb-port-color);
+    transform: scale(1.3);
+  }
+
+  &.rb-port--false {
+    border-color: #ef4444;
+    margin-left: 0;
+    &:hover { background: #ef4444; }
+  }
+
+  &.rb-port--true {
+    border-color: var(--rb-port-color);
+    margin-right: 0;
+  }
+}
+
+.rb-port-label {
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  font-weight: 700;
+  color: inherit;
+  pointer-events: none;
+
+  .rb-port--false & { color: #ef4444; }
+  .rb-port--true &  { color: var(--rb-port-color); }
+}

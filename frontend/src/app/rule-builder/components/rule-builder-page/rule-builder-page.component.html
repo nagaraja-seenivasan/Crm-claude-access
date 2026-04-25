@@ -1,0 +1,112 @@
+<div class="rb-page">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <!-- ── Top Toolbar ─────────────────────────────────────────────────────── -->
+  <div class="rb-toolbar">
+    <div class="rb-toolbar-left">
+      <p-button icon="pi pi-arrow-left" styleClass="p-button-text p-button-sm"
+                pTooltip="Back to rules" (onClick)="goBack()"></p-button>
+      <p-divider layout="vertical" styleClass="mx-2"></p-divider>
+      <input pInputText [(ngModel)]="rule.name" placeholder="Rule name"
+             class="rb-name-input" />
+    </div>
+
+    <div class="rb-toolbar-center">
+      <span class="rb-entity-label">Entity:</span>
+      <p-dropdown
+        [options]="entityTypeOptions"
+        [(ngModel)]="rule.entityType"
+        (ngModelChange)="onEntityTypeChange()"
+        optionLabel="label" optionValue="value"
+        styleClass="rb-entity-select" appendTo="body">
+      </p-dropdown>
+    </div>
+
+    <div class="rb-toolbar-right">
+      <p-button icon="pi pi-trash" label="Clear" styleClass="p-button-text p-button-secondary p-button-sm"
+                (onClick)="confirmClear()"></p-button>
+      <p-button icon="pi pi-play" label="Test" styleClass="p-button-outlined p-button-sm"
+                (onClick)="openTestDialog()"></p-button>
+      <p-button icon="pi pi-save" label="Save" styleClass="p-button-sm"
+                [loading]="saving" (onClick)="saveRule()"></p-button>
+      <p-inputSwitch [(ngModel)]="rule.isActive" pTooltip="Rule active"></p-inputSwitch>
+    </div>
+  </div>
+
+  <!-- ── Main Layout ─────────────────────────────────────────────────────── -->
+  <div class="rb-body">
+    <!-- Palette -->
+    <app-node-palette></app-node-palette>
+
+    <!-- Canvas -->
+    <app-rule-canvas #canvas
+      [entityFields]="entityFields"
+      (nodeSelected)="onNodeSelected($event)"
+      (ruleChanged)="onRuleChanged($event)">
+    </app-rule-canvas>
+
+    <!-- Properties panel (only when a node is selected) -->
+    @if (selectedNode) {
+      <app-node-properties
+        [node]="selectedNode"
+        [entityFields]="entityFields"
+        [notificationTemplates]="notificationTemplates"
+        (nodeChanged)="onNodeChanged($event)">
+      </app-node-properties>
+    }
+  </div>
+</div>
+
+<!-- ── Test Dialog ──────────────────────────────────────────────────────── -->
+<p-dialog header="Test Rule" [(visible)]="showTestDialog"
+          [modal]="true" [style]="{width: '680px'}" [draggable]="true">
+
+  <div class="test-scope-section">
+    <label class="test-label">Scope JSON (entity payload)</label>
+    <textarea pInputTextarea [(ngModel)]="testScope" [rows]="10"
+              class="test-scope-input w-full font-mono text-sm"
+              [class.p-invalid]="testScopeError">
+    </textarea>
+    @if (testScopeError) {
+      <small class="p-error">{{ testScopeError }}</small>
+    }
+  </div>
+
+  @if (showTestResults) {
+    <p-divider></p-divider>
+    <div class="test-results">
+      <h4 class="test-results-title">Execution Results</h4>
+      @for (result of testResults; track $index) {
+        <p-card styleClass="test-result-card mb-2">
+          <ng-template pTemplate="header">
+            <div class="test-result-header">
+              <span class="test-result-name">{{ $any(result).ruleName }}</span>
+              <p-tag
+                [value]="$any(result).outcome"
+                [severity]="$any(result).outcome === 'completed' ? 'success' : $any(result).outcome === 'failed' ? 'danger' : 'warning'">
+              </p-tag>
+            </div>
+          </ng-template>
+          <div class="test-result-body">
+            <span class="test-detail-label">Nodes executed:</span>
+            <span>{{ $any(result).nodesExecuted?.join(' → ') || '—' }}</span>
+          </div>
+          @if ($any(result).errorMessage) {
+            <p class="test-error">{{ $any(result).errorMessage }}</p>
+          }
+        </p-card>
+      }
+      @if (testResults.length === 0) {
+        <p class="test-no-results">No matching active rules found for this entity type.</p>
+      }
+    </div>
+  }
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" icon="pi pi-times" styleClass="p-button-text"
+              (onClick)="showTestDialog = false"></p-button>
+    <p-button label="Run Test" icon="pi pi-play"
+              [loading]="testing" (onClick)="runTest()"></p-button>
+  </ng-template>
+</p-dialog>

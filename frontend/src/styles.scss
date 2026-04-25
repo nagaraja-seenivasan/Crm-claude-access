@@ -1,0 +1,30 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: var(--font-family);
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+// Rule Builder canvas token overrides
+:root {
+  --rb-canvas-bg: #f1f5f9;
+  --rb-canvas-dot: #cbd5e1;
+  --rb-node-bg: #ffffff;
+  --rb-node-border: #e2e8f0;
+  --rb-node-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --rb-node-selected-border: #6366f1;
+  --rb-connection-color: #6366f1;
+  --rb-port-size: 12px;
+  --rb-port-color: #6366f1;
+  --rb-node-trigger-accent: #10b981;
+  --rb-node-condition-accent: #f59e0b;
+  --rb-node-setvalue-accent: #6366f1;
+  --rb-node-notification-accent: #ec4899;
+  --rb-node-end-accent: #ef4444;
+}
