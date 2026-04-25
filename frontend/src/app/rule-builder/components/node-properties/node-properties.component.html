@@ -8,7 +8,7 @@
   <div class="props-field">
     <label class="props-label">Label</label>
     <input pInputText class="w-full" [value]="node.label"
-           (change)="onLabelChange(($event.target as HTMLInputElement).value)" />
+           (change)="onLabelChange($any($event.target).value)" />
   </div>
 
   <p-divider></p-divider>
@@ -236,7 +236,7 @@
         <div class="flex gap-1 mb-1">
           <input pInputText class="flex-1" placeholder="email or field path"
                  [value]="r"
-                 (change)="updateRecipient($index, ($event.target as HTMLInputElement).value)" />
+                 (change)="updateRecipient($index, $any($event.target).value)" />
           <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm"
                   (click)="removeRecipient($index)"></button>
         </div>

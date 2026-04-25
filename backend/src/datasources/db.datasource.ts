@@ -1,18 +1,20 @@
 import {inject, lifeCycleObserver, LifeCycleObserver} from '@loopback/core';
 import {juggler} from '@loopback/repository';
 
-const config = {
-  name: 'db',
-  connector: 'mongodb',
-  url: process.env['MONGODB_URL'] ?? 'mongodb://localhost:27017/crm_rules',
-  host: process.env['MONGODB_HOST'] ?? 'localhost',
-  port: parseInt(process.env['MONGODB_PORT'] ?? '27017', 10),
-  user: process.env['MONGODB_USER'] ?? '',
-  password: process.env['MONGODB_PASSWORD'] ?? '',
-  database: process.env['MONGODB_DB'] ?? 'crm_rules',
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-};
+const useMongo = !!process.env['MONGODB_URL'];
+
+const config = useMongo
+  ? {
+      name: 'db',
+      connector: 'mongodb',
+      url: process.env['MONGODB_URL'],
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }
+  : {
+      name: 'db',
+      connector: 'memory',
+    };
 
 @lifeCycleObserver('datasource')
 export class DbDataSource
