@@ -1,3 +1,10 @@
+:host {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-width: 0;
+}
+
 .rb-canvas-wrapper {
   position: relative;
   flex: 1;

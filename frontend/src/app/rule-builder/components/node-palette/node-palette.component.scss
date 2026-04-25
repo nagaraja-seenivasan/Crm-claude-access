@@ -1,3 +1,8 @@
+:host {
+  display: flex;
+  flex-shrink: 0;
+}
+
 .palette-container {
   width: 200px;
   min-width: 200px;
