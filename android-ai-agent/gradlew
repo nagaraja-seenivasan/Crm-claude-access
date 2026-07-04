@@ -1,0 +1,20 @@
+#!/bin/sh
+
+#
+# Gradle wrapper launch script. If gradle/wrapper/gradle-wrapper.jar is missing
+# (it is a binary and not checked in here), run `gradle wrapper --gradle-version 8.9`
+# once, or open the project in Android Studio which regenerates it automatically.
+#
+
+APP_HOME=$(cd "$(dirname "$0")" >/dev/null && pwd)
+CLASSPATH="$APP_HOME/gradle/wrapper/gradle-wrapper.jar"
+
+if [ ! -f "$CLASSPATH" ]; then
+  echo "gradle-wrapper.jar not found. Run: gradle wrapper --gradle-version 8.9" >&2
+  echo "or open this project in Android Studio to generate the wrapper." >&2
+  exit 1
+fi
+
+exec "${JAVA_HOME:+$JAVA_HOME/bin/}java" \
+  -classpath "$CLASSPATH" \
+  org.gradle.wrapper.GradleWrapperMain "$@"
