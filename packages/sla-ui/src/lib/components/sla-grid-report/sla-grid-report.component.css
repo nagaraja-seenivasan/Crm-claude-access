@@ -1,0 +1,115 @@
+:host {
+  --sla-surface: #ffffff;
+  --sla-border: #e4e7ec;
+  --sla-text: #1a1f29;
+  --sla-muted: #667085;
+  --sla-accent: #3b5bdb;
+  --sla-head: #f5f7fa;
+  display: block;
+  color: var(--sla-text);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+.sla-grid {
+  background: var(--sla-surface);
+  border: 1px solid var(--sla-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.sla-grid--empty {
+  padding: 40px;
+  text-align: center;
+  color: var(--sla-muted);
+}
+.sla-grid__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  flex-wrap: wrap;
+}
+.sla-grid__title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 650;
+}
+.sla-grid__sub {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  color: var(--sla-muted);
+}
+.sla-grid__actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.sla-grid__filter {
+  border: 1px solid var(--sla-border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.85rem;
+  min-width: 160px;
+  background: var(--sla-surface);
+  color: var(--sla-text);
+}
+.sla-grid__btn {
+  border: 1px solid var(--sla-accent);
+  background: var(--sla-accent);
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.sla-grid__btn:hover { filter: brightness(1.07); }
+
+.sla-grid__scroll {
+  overflow-x: auto;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.sla-grid__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.sla-grid__table th,
+.sla-grid__table td {
+  padding: 9px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--sla-border);
+  white-space: nowrap;
+}
+.sla-grid__table th {
+  position: sticky;
+  top: 0;
+  background: var(--sla-head);
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  z-index: 1;
+}
+.sla-grid__table th.sorted { color: var(--sla-accent); }
+.sla-grid__table .numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.sla-grid__table tbody tr:hover { background: rgba(59, 91, 219, 0.05); }
+.sla-grid__sortcue { font-size: 0.7rem; margin-left: 2px; }
+.sla-grid__none {
+  text-align: center;
+  color: var(--sla-muted);
+  padding: 24px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --sla-surface: #1b1f27;
+    --sla-border: #2d333f;
+    --sla-text: #e7eaf0;
+    --sla-muted: #98a2b3;
+    --sla-head: #232833;
+  }
+}

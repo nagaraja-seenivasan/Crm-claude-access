@@ -384,13 +384,13 @@ export class RuleCanvasComponent implements OnInit, OnDestroy {
 
   nodeIcon(type: NodeType): string {
     const icons: Record<NodeType, string> = {
-      trigger: 'pi-bolt',
-      condition: 'pi-sitemap',
-      'set-value': 'pi-pencil',
-      notification: 'pi-bell',
-      end: 'pi-stop-circle',
+      trigger: 'bolt',
+      condition: 'sitemap',
+      'set-value': 'pencil',
+      notification: 'bell',
+      end: 'stop-circle',
     };
-    return icons[type] ?? 'pi-circle';
+    return icons[type] ?? 'circle';
   }
 
   hasOutputPorts(type: NodeType): boolean {

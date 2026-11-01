@@ -1,49 +1,47 @@
 <div class="props-container">
   <div class="props-header">
-    <i class="pi pi-sliders-h"></i>
+    <app-icon name="sliders"></app-icon>
     <span>Node Properties</span>
   </div>
 
   <!-- Label -->
   <div class="props-field">
-    <label class="props-label">Label</label>
-    <input pInputText class="w-full" [value]="node.label"
+    <label class="props-label" for="np-label">Label</label>
+    <input id="np-label" class="ui-input w-full" [value]="node.label"
            (change)="onLabelChange($any($event.target).value)" />
   </div>
 
-  <p-divider></p-divider>
+  <hr class="ui-divider" />
 
   <!-- ── TRIGGER ──────────────────────────────────────────────────── -->
   @if (nodeType === 'trigger') {
     <div class="props-section-title">Trigger Configuration</div>
 
     <div class="props-field">
-      <label class="props-label">Trigger Type</label>
-      <p-dropdown
-        [options]="triggerTypeOptions"
-        [(ngModel)]="triggerData.triggerType"
-        (ngModelChange)="onTriggerChange()"
-        optionLabel="label" optionValue="value"
-        styleClass="w-full" appendTo="body">
-      </p-dropdown>
+      <label class="props-label" for="np-trigger-type">Trigger Type</label>
+      <select id="np-trigger-type" class="ui-select w-full"
+              [(ngModel)]="triggerData.triggerType" (ngModelChange)="onTriggerChange()">
+        @for (o of triggerTypeOptions; track o.value) {
+          <option [ngValue]="o.value">{{ o.label }}</option>
+        }
+      </select>
     </div>
 
     <div class="props-field">
-      <label class="props-label">Entity Type</label>
-      <p-dropdown
-        [options]="entityTypeOptions"
-        [(ngModel)]="triggerData.entityType"
-        (ngModelChange)="onTriggerChange()"
-        optionLabel="label" optionValue="value"
-        placeholder="Select entity"
-        styleClass="w-full" appendTo="body">
-      </p-dropdown>
+      <label class="props-label" for="np-entity">Entity Type</label>
+      <select id="np-entity" class="ui-select w-full"
+              [(ngModel)]="triggerData.entityType" (ngModelChange)="onTriggerChange()">
+        <option [ngValue]="''" disabled>Select entity</option>
+        @for (o of entityTypeOptions; track o.value) {
+          <option [ngValue]="o.value">{{ o.label }}</option>
+        }
+      </select>
     </div>
 
     @if (triggerData.triggerType === 'SQS') {
       <div class="props-field">
-        <label class="props-label">SQS Queue Name</label>
-        <input pInputText class="w-full" placeholder="my-crm-queue"
+        <label class="props-label" for="np-queue">SQS Queue Name</label>
+        <input id="np-queue" class="ui-input w-full" placeholder="my-crm-queue"
                [(ngModel)]="triggerData.sqsQueueName"
                (ngModelChange)="onTriggerChange()" />
       </div>
@@ -56,32 +54,30 @@
 
     <!-- Primary clause -->
     <div class="props-field">
-      <label class="props-label">Field</label>
-      <p-dropdown
-        [options]="fieldOptions"
-        [(ngModel)]="conditionData.field"
-        (ngModelChange)="onConditionChange()"
-        optionLabel="label" optionValue="value"
-        placeholder="Select field" [filter]="true"
-        styleClass="w-full" appendTo="body">
-      </p-dropdown>
+      <label class="props-label" for="np-cond-field">Field</label>
+      <select id="np-cond-field" class="ui-select w-full"
+              [(ngModel)]="conditionData.field" (ngModelChange)="onConditionChange()">
+        <option [ngValue]="''" disabled>Select field</option>
+        @for (o of fieldOptions; track o.value) {
+          <option [ngValue]="o.value">{{ o.label }}</option>
+        }
+      </select>
     </div>
 
     <div class="props-field">
-      <label class="props-label">Operator</label>
-      <p-dropdown
-        [options]="operatorOptions"
-        [(ngModel)]="conditionData.operator"
-        (ngModelChange)="onConditionChange()"
-        optionLabel="label" optionValue="value"
-        styleClass="w-full" appendTo="body">
-      </p-dropdown>
+      <label class="props-label" for="np-cond-op">Operator</label>
+      <select id="np-cond-op" class="ui-select w-full"
+              [(ngModel)]="conditionData.operator" (ngModelChange)="onConditionChange()">
+        @for (o of operatorOptions; track o.value) {
+          <option [ngValue]="o.value">{{ o.label }}</option>
+        }
+      </select>
     </div>
 
     @if (operatorNeedsValue(conditionData.operator)) {
       <div class="props-field">
-        <label class="props-label">Value</label>
-        <input pInputText class="w-full" placeholder="Compare value"
+        <label class="props-label" for="np-cond-value">Value</label>
+        <input id="np-cond-value" class="ui-input w-full" placeholder="Compare value"
                [ngModel]="conditionData.value"
                (ngModelChange)="conditionData.value = $event; onConditionChange()" />
       </div>
@@ -89,37 +85,44 @@
 
     <!-- Multi-clause section -->
     @if ((conditionData.conditions?.length ?? 0) > 0) {
-      <p-divider></p-divider>
+      <hr class="ui-divider" />
       <div class="props-field">
-        <label class="props-label">Combine clauses with</label>
-        <p-selectButton
-          [options]="logicalOperatorOptions"
-          [(ngModel)]="conditionData.logicalOperator"
-          (ngModelChange)="onConditionChange()"
-          optionLabel="label" optionValue="value">
-        </p-selectButton>
+        <span class="props-label">Combine clauses with</span>
+        <div class="ui-segmented" role="radiogroup" aria-label="Combine clauses with">
+          @for (o of logicalOperatorOptions; track o.value) {
+            <button type="button" role="radio"
+                    [attr.aria-checked]="conditionData.logicalOperator === o.value"
+                    [class.is-active]="conditionData.logicalOperator === o.value"
+                    (click)="conditionData.logicalOperator = $any(o.value); onConditionChange()">
+              {{ o.label }}
+            </button>
+          }
+        </div>
       </div>
 
       @for (clause of conditionData.conditions; track trackByIndex($index)) {
         <div class="props-clause">
           <div class="props-clause-row">
-            <p-dropdown
-              [options]="fieldOptions" [(ngModel)]="clause.field"
-              (ngModelChange)="updateClause($index, clause)"
-              placeholder="Field" optionLabel="label" optionValue="value"
-              styleClass="flex-1" appendTo="body">
-            </p-dropdown>
-            <p-dropdown
-              [options]="operatorOptions" [(ngModel)]="clause.operator"
-              (ngModelChange)="updateClause($index, clause)"
-              optionLabel="label" optionValue="value"
-              styleClass="w-7rem" appendTo="body">
-            </p-dropdown>
-            <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm"
-                    (click)="removeClause($index)"></button>
+            <select class="ui-select flex-1" aria-label="Field"
+                    [(ngModel)]="clause.field" (ngModelChange)="updateClause($index, clause)">
+              <option [ngValue]="''" disabled>Field</option>
+              @for (o of fieldOptions; track o.value) {
+                <option [ngValue]="o.value">{{ o.label }}</option>
+              }
+            </select>
+            <select class="ui-select props-op-select" aria-label="Operator"
+                    [(ngModel)]="clause.operator" (ngModelChange)="updateClause($index, clause)">
+              @for (o of operatorOptions; track o.value) {
+                <option [ngValue]="o.value">{{ o.label }}</option>
+              }
+            </select>
+            <button type="button" class="ui-btn ui-btn--text ui-btn--danger-text ui-btn--icon"
+                    aria-label="Remove clause" (click)="removeClause($index)">
+              <app-icon name="trash"></app-icon>
+            </button>
           </div>
           @if (operatorNeedsValue(clause.operator)) {
-            <input pInputText class="w-full mt-1" placeholder="Value"
+            <input class="ui-input w-full mt-1" placeholder="Value" aria-label="Value"
                    [(ngModel)]="clause.value"
                    (ngModelChange)="updateClause($index, clause)" />
           }
@@ -127,8 +130,9 @@
       }
     }
 
-    <button pButton icon="pi pi-plus" label="Add clause" class="p-button-text p-button-sm mt-1"
-            (click)="addClause()"></button>
+    <button type="button" class="ui-btn ui-btn--text ui-btn--sm props-add" (click)="addClause()">
+      <app-icon name="plus"></app-icon> Add clause
+    </button>
   }
 
   <!-- ── SET VALUE ─────────────────────────────────────────────────── -->
@@ -139,30 +143,32 @@
       <div class="props-assignment">
         <div class="props-assignment-header">
           <span class="props-assign-num">#{{ $index + 1 }}</span>
-          <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm"
-                  (click)="removeAssignment($index)"></button>
+          <button type="button" class="ui-btn ui-btn--text ui-btn--danger-text ui-btn--icon"
+                  aria-label="Remove assignment" (click)="removeAssignment($index)">
+            <app-icon name="trash"></app-icon>
+          </button>
         </div>
         <div class="props-field">
           <label class="props-label">Target Field</label>
-          <p-dropdown
-            [options]="fieldOptions" [(ngModel)]="a.targetField"
-            (ngModelChange)="onSetValueChange()"
-            placeholder="Choose field" optionLabel="label" optionValue="value"
-            styleClass="w-full" appendTo="body">
-          </p-dropdown>
+          <select class="ui-select w-full" aria-label="Target field"
+                  [(ngModel)]="a.targetField" (ngModelChange)="onSetValueChange()">
+            <option [ngValue]="''" disabled>Choose field</option>
+            @for (o of fieldOptions; track o.value) {
+              <option [ngValue]="o.value">{{ o.label }}</option>
+            }
+          </select>
         </div>
         <div class="props-field">
           <label class="props-label">
             Value
-            <p-toggleButton
-              [(ngModel)]="a.isExpression"
-              (ngModelChange)="onSetValueChange()"
-              onLabel="Expression" offLabel="Literal"
-              onIcon="pi pi-code" offIcon="pi pi-pencil"
-              styleClass="p-button-sm ml-2">
-            </p-toggleButton>
+            <button type="button" class="ui-btn ui-btn--sm ui-btn--outlined props-mode-toggle"
+                    [attr.aria-pressed]="a.isExpression"
+                    (click)="a.isExpression = !a.isExpression; onSetValueChange()">
+              <app-icon [name]="a.isExpression ? 'code' : 'pencil'"></app-icon>
+              {{ a.isExpression ? 'Expression' : 'Literal' }}
+            </button>
           </label>
-          <input pInputText class="w-full"
+          <input class="ui-input w-full" aria-label="Value"
                  [placeholder]="a.isExpression ? '{{field}} or template string' : 'Literal value'"
                  [ngModel]="a.value"
                  (ngModelChange)="a.value = $event; onSetValueChange()" />
@@ -170,18 +176,21 @@
       </div>
     }
 
-    <button pButton icon="pi pi-plus" label="Add assignment" class="p-button-text p-button-sm mt-1"
-            (click)="addAssignment()"></button>
+    <button type="button" class="ui-btn ui-btn--text ui-btn--sm props-add" (click)="addAssignment()">
+      <app-icon name="plus"></app-icon> Add assignment
+    </button>
 
-    <p-divider></p-divider>
+    <hr class="ui-divider" />
 
     <div class="props-field">
-      <div class="flex align-items-center gap-2">
-        <p-inputSwitch [(ngModel)]="setValueData.saveEntity"
-                       (ngModelChange)="onSetValueChange()">
-        </p-inputSwitch>
-        <label class="props-label mb-0">Save entity after assignment</label>
-      </div>
+      <label class="props-switch-row">
+        <span class="ui-switch">
+          <input type="checkbox" [(ngModel)]="setValueData.saveEntity"
+                 (ngModelChange)="onSetValueChange()" />
+          <span class="ui-switch__track"></span>
+        </span>
+        <span class="props-label mb-0">Save entity after assignment</span>
+      </label>
     </div>
   }
 
@@ -190,66 +199,73 @@
     <div class="props-section-title">Notification Configuration</div>
 
     <div class="props-field">
-      <label class="props-label">Channel</label>
-      <p-selectButton
-        [options]="channelOptions"
-        [(ngModel)]="notificationData.channel"
-        (ngModelChange)="onNotificationChange()"
-        optionLabel="label" optionValue="value">
-      </p-selectButton>
+      <span class="props-label">Channel</span>
+      <div class="ui-segmented ui-segmented--wrap" role="radiogroup" aria-label="Channel">
+        @for (o of channelOptions; track o.value) {
+          <button type="button" role="radio"
+                  [attr.aria-checked]="notificationData.channel === o.value"
+                  [class.is-active]="notificationData.channel === o.value"
+                  (click)="notificationData.channel = $any(o.value); onNotificationChange()">
+            {{ o.label }}
+          </button>
+        }
+      </div>
     </div>
 
     <div class="props-field">
-      <label class="props-label">Template</label>
-      <p-dropdown
-        [options]="templateOptions"
-        [(ngModel)]="notificationData.templateId"
-        (ngModelChange)="onNotificationChange()"
-        placeholder="Select template" optionLabel="label" optionValue="value"
-        styleClass="w-full" appendTo="body">
-      </p-dropdown>
+      <label class="props-label" for="np-template">Template</label>
+      <select id="np-template" class="ui-select w-full"
+              [(ngModel)]="notificationData.templateId" (ngModelChange)="onNotificationChange()">
+        <option [ngValue]="''" disabled>Select template</option>
+        @for (o of templateOptions; track o.value) {
+          <option [ngValue]="o.value">{{ o.label }}</option>
+        }
+      </select>
     </div>
 
     @if (notificationData.channel === 'EMAIL') {
       <div class="props-field">
-        <label class="props-label">Subject</label>
-        <input pInputText class="w-full" placeholder="Email subject"
+        <label class="props-label" for="np-subject">Subject</label>
+        <input id="np-subject" class="ui-input w-full" placeholder="Email subject"
                [(ngModel)]="notificationData.subject"
                (ngModelChange)="onNotificationChange()" />
       </div>
     }
 
     <div class="props-field">
-      <label class="props-label">Recipient Field</label>
-      <p-dropdown
-        [options]="fieldOptions"
-        [(ngModel)]="notificationData.recipientField"
-        (ngModelChange)="onNotificationChange()"
-        placeholder="e.g. owner.email" optionLabel="label" optionValue="value"
-        [filter]="true" styleClass="w-full" appendTo="body">
-      </p-dropdown>
+      <label class="props-label" for="np-recipient">Recipient Field</label>
+      <select id="np-recipient" class="ui-select w-full"
+              [(ngModel)]="notificationData.recipientField" (ngModelChange)="onNotificationChange()">
+        <option [ngValue]="''" disabled>e.g. owner.email</option>
+        @for (o of fieldOptions; track o.value) {
+          <option [ngValue]="o.value">{{ o.label }}</option>
+        }
+      </select>
     </div>
 
     <div class="props-field">
-      <label class="props-label">Additional Recipients</label>
+      <span class="props-label">Additional Recipients</span>
       @for (r of notificationData.additionalRecipients; track trackByIndex($index)) {
-        <div class="flex gap-1 mb-1">
-          <input pInputText class="flex-1" placeholder="email or field path"
+        <div class="props-recipient-row">
+          <input class="ui-input flex-1" placeholder="email or field path" aria-label="Recipient"
                  [value]="r"
                  (change)="updateRecipient($index, $any($event.target).value)" />
-          <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm"
-                  (click)="removeRecipient($index)"></button>
+          <button type="button" class="ui-btn ui-btn--text ui-btn--danger-text ui-btn--icon"
+                  aria-label="Remove recipient" (click)="removeRecipient($index)">
+            <app-icon name="trash"></app-icon>
+          </button>
         </div>
       }
-      <button pButton icon="pi pi-plus" label="Add" class="p-button-text p-button-sm"
-              (click)="addRecipient()"></button>
+      <button type="button" class="ui-btn ui-btn--text ui-btn--sm" (click)="addRecipient()">
+        <app-icon name="plus"></app-icon> Add
+      </button>
     </div>
   }
 
   <!-- ── END ──────────────────────────────────────────────────────── -->
   @if (nodeType === 'end') {
     <div class="props-end-hint">
-      <i class="pi pi-stop-circle"></i>
+      <app-icon name="stop-circle"></app-icon>
       <p>This node terminates the current flow branch. No configuration needed.</p>
     </div>
   }

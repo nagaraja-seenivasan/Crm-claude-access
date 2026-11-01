@@ -53,7 +53,7 @@
   pointer-events: none;
   z-index: 5;
 
-  i {
+  app-icon {
     font-size: 1.2rem;
     animation: hint-pulse 2s ease-in-out infinite;
   }
@@ -184,7 +184,7 @@
     color: #ef4444;
   }
 
-  i { font-size: 0.65rem; }
+  app-icon { font-size: 0.65rem; }
 }
 
 .rb-node-body {

@@ -21,7 +21,7 @@ List all rules.
 ```json
 [
   {
-    "id": "64f1a2b3c4d5e6f7a8b9c0d1",
+    "id": "3f2b8c1e-7a4d-4e2b-9c1f-5d6a7b8c9d0e",
     "name": "Set Lead Status on High Value",
     "entityType": "Lead",
     "isActive": true,
@@ -134,7 +134,7 @@ Manually execute rules against a scope object (for testing).
 {
   "executedRules": [
     {
-      "ruleId": "64f1a2b3c4d5e6f7a8b9c0d1",
+      "ruleId": "3f2b8c1e-7a4d-4e2b-9c1f-5d6a7b8c9d0e",
       "ruleName": "Set Lead Status on High Value",
       "outcome": "completed",
       "nodesExecuted": ["node-1", "node-2", "node-3"],
