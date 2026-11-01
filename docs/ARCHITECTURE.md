@@ -4,16 +4,23 @@
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | Angular 17 · PrimeNG 17 · Angular CDK · strict TypeScript |
+| Frontend | Angular 17 · Angular CDK · strict TypeScript (plain Angular components, no third-party UI kit) |
 | Backend | Node.js · LoopBack 4 · strict TypeScript |
 | Message queue | AWS SQS |
-| Database | MongoDB (configurable via LoopBack datasource) |
+| Events & timers | AWS EventBridge (incident event rules) · EventBridge Scheduler (SLA timers) |
+| Database | MySQL 8.0+ (schema scripts in `database/mysql/`) |
+| SLA libraries | `@crm/sla-engine` (Node.js, zero dependencies) · `@crm/sla-ui` (Angular components) |
 
 ## Directory Layout
 
 ```
 Crm-claude-access/
 ├── docs/                         ← project documentation (this folder)
+├── database/
+│   └── mysql/                    ← MySQL 8 schema scripts (SLA tables, views, sample queries)
+├── packages/
+│   ├── sla-engine/               ← SLA library: calendars, triggers, EventBridge adapter, reports
+│   └── sla-ui/                   ← Angular SLA components: setup, report builder, dashboard, grid
 ├── frontend/                     ← Angular application
 │   └── src/app/
 │       └── rule-builder/
@@ -31,7 +38,7 @@ Crm-claude-access/
         ├── repositories/         ← data access
         ├── services/             ← rule engine, notifications, SQS consumer
         ├── types/                ← shared TypeScript types
-        └── datasources/          ← DB connection config
+        └── datasources/          ← MySQL connection config
 ```
 
 ## Rule Data Model
@@ -103,6 +110,17 @@ SQS Queue  →  SqsConsumerService.poll()
 ```
 
 Queue URL and polling interval are set in `backend/.env`.
+
+## SLA Tracking
+
+SLA logic lives in two libraries; the application imports them and does the
+I/O. See [SLA.md](./SLA.md) for details.
+
+```
+Incident create/update ─┐                         ┌─▶ MySQL: incident_sla, incident_sla_summary,
+(API or EventBridge→SQS)├─▶ SlaTriggerProcessor ──┤        sla_event, sla_schedule_outbox
+SLA timer (Scheduler→SQS)┘   (@crm/sla-engine)    └─▶ outbox dispatcher ─▶ EventBridge Scheduler
+```
 
 ## Frontend Canvas Architecture
 

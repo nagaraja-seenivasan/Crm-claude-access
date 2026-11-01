@@ -70,8 +70,11 @@ Values in Set Value nodes can be:
 # Frontend
 cd frontend && npm install && ng serve
 
+# Database (MySQL 8.0+): apply the schema scripts in order
+for f in database/mysql/0*.sql; do mysql -u <user> -p <database> < "$f"; done
+
 # Backend
 cd backend && npm install && npm run build && npm start
 ```
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for system design and [API.md](./API.md) for the REST endpoints.
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for system design, [API.md](./API.md) for the REST endpoints and [SLA.md](./SLA.md) for SLA tracking.
