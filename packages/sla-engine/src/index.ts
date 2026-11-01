@@ -11,10 +11,12 @@
 export {BusinessCalendar} from './calendar';
 export {SlaPolicy} from './policy';
 export {SlaEngine} from './engine';
-export {evaluateInstance, evaluateAt} from './tracker';
+export {evaluateInstance, evaluateAt, heldBusinessSeconds, isPaused} from './tracker';
 export {toEpochMs} from './time';
 
 export * from './report/index';
+export * from './trigger/index';
+export * from './aws/eventbridge';
 
 export type {
   EpochMs,

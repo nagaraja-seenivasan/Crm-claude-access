@@ -5,7 +5,7 @@ Agreement tracking and reporting.
 
 | Package | Stack | Purpose |
 | --- | --- | --- |
-| [`@crm/sla-engine`](./sla-engine) | Node.js / TypeScript (zero deps) | High-performance SLA computation + report-optimized streaming aggregation. ~1M instances/s. |
+| [`@crm/sla-engine`](./sla-engine) | Node.js / TypeScript (zero deps) | High-performance SLA computation, report-optimized streaming aggregation (~1M instances/s), incident triggers, and the AWS EventBridge Scheduler adapter. |
 | [`@crm/sla-ui`](./sla-ui) | Angular 17+ | SLA setup, report builder, dashboard report, and downloadable gridview report. |
 
 ## How they fit together
@@ -44,5 +44,8 @@ cd packages/sla-ui && npm install && npm run build
 `@crm/sla-ui` depends on `@crm/sla-engine`; during local development it resolves
 the engine via `file:../sla-engine`. Build the engine first (`npm run build` in
 `sla-engine`) so its `dist/` types are available.
+
+MySQL tables for storing SLA details with incidents are in
+[`database/mysql`](../database/mysql).
 
 Both are MIT licensed.

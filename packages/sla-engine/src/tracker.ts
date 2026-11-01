@@ -7,7 +7,7 @@ import type {EpochMs, HoldWindow, SlaEvaluation, SlaInstance} from './types';
  * Hold windows are clamped to the `[start, end]` range and their business time
  * is subtracted from the elapsed clock.
  */
-function heldSeconds(
+export function heldBusinessSeconds(
   cal: BusinessCalendar,
   holds: HoldWindow[] | undefined,
   start: EpochMs,
@@ -24,7 +24,7 @@ function heldSeconds(
 }
 
 /** Whether a hold is currently open at `now`. */
-function isPaused(holds: HoldWindow[] | undefined, now: EpochMs): boolean {
+export function isPaused(holds: HoldWindow[] | undefined, now: EpochMs): boolean {
   if (!holds) return false;
   for (let i = 0; i < holds.length; i++) {
     const to = holds[i].to;
@@ -57,7 +57,7 @@ export function evaluateInstance(
 
   const end = instance.completedAt ?? now;
   const grossSeconds = cal.businessSecondsBetween(start, end);
-  const held = heldSeconds(cal, instance.holds, start, end);
+  const held = heldBusinessSeconds(cal, instance.holds, start, end);
   const elapsed = Math.max(0, grossSeconds - held);
   const remaining = targetSeconds - elapsed;
 
@@ -66,7 +66,9 @@ export function evaluateInstance(
 
   const completed = instance.state === 'completed' || instance.completedAt !== undefined;
   const paused = !completed && isPaused(instance.holds, now);
-  const breached = elapsed > targetSeconds;
+  // Completing exactly on the deadline is met; an open SLA that has reached its
+  // deadline is breached (this is the instant the breach timer fires).
+  const breached = completed ? elapsed > targetSeconds : targetSeconds > 0 && elapsed >= targetSeconds;
   const breachedAt = breached ? cal.addBusinessSeconds(start, targetSeconds + held) : undefined;
 
   let status: SlaEvaluation['status'];

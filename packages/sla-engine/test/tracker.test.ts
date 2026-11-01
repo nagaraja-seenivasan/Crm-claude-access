@@ -67,7 +67,8 @@ test('holds pause the clock and push the deadline', () => {
   );
   assert.equal(ev.elapsedSeconds, 4 * H);
   assert.equal(ev.remainingSeconds, 0);
-  assert.equal(ev.status, 'running'); // 4h elapsed == 4h target, not yet over
+  assert.equal(ev.status, 'breached'); // open and the deadline has arrived
+  assert.equal(ev.breachedAt, MON_09 + 6 * H * 1000); // pushed out by the 2h hold
 });
 
 test('open hold reports paused', () => {
@@ -78,6 +79,11 @@ test('open hold reports paused', () => {
   );
   assert.equal(ev.status, 'paused');
   assert.equal(ev.elapsedSeconds, 1 * H);
+});
+
+test('completing exactly on the deadline is met', () => {
+  const ev = evaluateInstance(inst({state: 'completed', completedAt: MON_09 + 4 * H * 1000}), cal, MON_09 + 9 * H * 1000);
+  assert.equal(ev.status, 'met');
 });
 
 test('cancelled instance', () => {
