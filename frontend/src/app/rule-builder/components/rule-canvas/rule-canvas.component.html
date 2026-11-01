@@ -6,20 +6,20 @@
 
   <!-- Zoom Toolbar -->
   <div class="rb-zoom-bar">
-    <p-button icon="pi pi-minus" styleClass="p-button-text p-button-sm" pTooltip="Zoom out"
-              (onClick)="zoomOut()"></p-button>
+    <button type="button" class="ui-btn ui-btn--text ui-btn--icon" title="Zoom out" aria-label="Zoom out"
+            (click)="zoomOut()"><app-icon name="minus"></app-icon></button>
     <span class="rb-zoom-label">{{ zoomPercent }}%</span>
-    <p-button icon="pi pi-plus" styleClass="p-button-text p-button-sm" pTooltip="Zoom in"
-              (onClick)="zoomIn()"></p-button>
-    <p-divider layout="vertical" styleClass="mx-1"></p-divider>
-    <p-button icon="pi pi-expand" styleClass="p-button-text p-button-sm" pTooltip="Reset view"
-              (onClick)="resetView()"></p-button>
+    <button type="button" class="ui-btn ui-btn--text ui-btn--icon" title="Zoom in" aria-label="Zoom in"
+            (click)="zoomIn()"><app-icon name="plus"></app-icon></button>
+    <span class="ui-divider-v"></span>
+    <button type="button" class="ui-btn ui-btn--text ui-btn--icon" title="Reset view" aria-label="Reset view"
+            (click)="resetView()"><app-icon name="expand"></app-icon></button>
   </div>
 
   <!-- Hint -->
   @if (nodes.length === 0) {
     <div class="rb-empty-hint">
-      <i class="pi pi-arrow-left"></i>
+      <app-icon name="arrow-left"></app-icon>
       <span>Drag a node from the palette to start building your rule</span>
     </div>
   }
@@ -98,17 +98,17 @@
         @if (node.type !== 'trigger') {
           <div class="rb-port rb-port--input"
                (mouseup)="onInputPortMouseUp($event, node)"
-               pTooltip="Drop connection here">
+               title="Drop connection here">
           </div>
         }
 
         <!-- Node header -->
         <div class="rb-node-header">
-          <i class="pi {{ nodeIcon(node.type) }} rb-node-icon"></i>
+          <app-icon [name]="nodeIcon(node.type)" class="rb-node-icon"></app-icon>
           <span class="rb-node-title">{{ node.label }}</span>
           <button class="rb-node-delete" (click)="deleteNode($event, node)"
-                  pTooltip="Delete node" tooltipPosition="top">
-            <i class="pi pi-times"></i>
+                  title="Delete node" aria-label="Delete node">
+            <app-icon name="times"></app-icon>
           </button>
         </div>
 
@@ -139,18 +139,18 @@
             @if (isCondition(node.type)) {
               <div class="rb-port rb-port--output rb-port--false"
                    (mousedown)="onOutputPortMouseDown($event, node, 'output-false')"
-                   pTooltip="FALSE branch">
+                   title="FALSE branch">
                 <span class="rb-port-label">F</span>
               </div>
               <div class="rb-port rb-port--output rb-port--true"
                    (mousedown)="onOutputPortMouseDown($event, node, 'output-true')"
-                   pTooltip="TRUE branch">
+                   title="TRUE branch">
                 <span class="rb-port-label">T</span>
               </div>
             } @else {
               <div class="rb-port rb-port--output"
                    (mousedown)="onOutputPortMouseDown($event, node, 'output')"
-                   pTooltip="Connect to next node">
+                   title="Connect to next node">
               </div>
             }
           </div>

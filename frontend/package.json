@@ -1,7 +1,7 @@
 {
   "name": "crm-rule-builder-frontend",
   "version": "1.0.0",
-  "description": "CRM Rule Builder — Angular + PrimeNG drag-and-drop workflow designer",
+  "description": "CRM Rule Builder \u2014 Angular drag-and-drop workflow designer",
   "license": "MIT",
   "scripts": {
     "ng": "ng",
@@ -21,9 +21,6 @@
     "@angular/platform-browser": "^17.3.0",
     "@angular/platform-browser-dynamic": "^17.3.0",
     "@angular/router": "^17.3.0",
-    "primeng": "^17.18.0",
-    "primeicons": "^6.0.1",
-    "primeflex": "^3.3.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.6.2",
     "uuid": "^9.0.1",

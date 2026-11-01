@@ -1,13 +1,14 @@
-# MySQL scripts: SLA storage
+# MySQL scripts
 
-Tables for storing the output of `@crm/sla-engine`'s trigger processor alongside
-incidents. MySQL **8.0+** (uses JSON, generated columns, `SKIP LOCKED`).
+Tables for the rule builder backend and for storing the output of
+`@crm/sla-engine`'s trigger processor alongside incidents. MySQL **8.0+** (uses JSON, generated columns, `SKIP LOCKED`).
 All `DATETIME(3)` values are **UTC**. The library uses epoch milliseconds, so
 convert with `FROM_UNIXTIME(ms / 1000)` or `new Date(ms)` and a driver set to
 `timezone: 'Z'`.
 
 | Script | Creates | Written from |
 | --- | --- | --- |
+| `000_rule_builder.sql` | `rule`, `rule_execution_log` | backend models `Rule`, `RuleExecutionLog` |
 | `001_sla_config.sql` | `sla_calendar`, `sla_policy`, `sla_trigger_config` | your admin UI / seed data |
 | `002_incident_sla.sql` | `incident_sla` (one row per incident + policy), `incident_sla_summary` | `result.records`, `result.summary` |
 | `003_sla_event.sql` | `sla_event` (append-only audit, idempotent unique key) | `result.events` |

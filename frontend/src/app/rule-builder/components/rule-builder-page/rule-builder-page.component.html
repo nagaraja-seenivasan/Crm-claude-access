@@ -1,36 +1,52 @@
 <div class="rb-page">
-  <p-toast></p-toast>
-  <p-confirmDialog></p-confirmDialog>
+  <!-- ── Toasts ──────────────────────────────────────────────────────────── -->
+  <div class="ui-toasts" aria-live="polite">
+    @for (t of toasts; track t.id) {
+      <div class="ui-toast ui-toast--{{ t.severity }}" role="status">
+        <app-icon [name]="t.severity === 'success' ? 'check' : 'exclamation-triangle'"></app-icon>
+        <span>{{ t.summary }}</span>
+        <button type="button" class="ui-toast__close" (click)="dismissToast(t.id)" aria-label="Dismiss">
+          <app-icon name="times"></app-icon>
+        </button>
+      </div>
+    }
+  </div>
 
   <!-- ── Top Toolbar ─────────────────────────────────────────────────────── -->
   <div class="rb-toolbar">
     <div class="rb-toolbar-left">
-      <p-button icon="pi pi-arrow-left" styleClass="p-button-text p-button-sm"
-                pTooltip="Back to rules" (onClick)="goBack()"></p-button>
-      <p-divider layout="vertical" styleClass="mx-2"></p-divider>
-      <input pInputText [(ngModel)]="rule.name" placeholder="Rule name"
-             class="rb-name-input" />
+      <button type="button" class="ui-btn ui-btn--text ui-btn--icon" title="Back to rules"
+              aria-label="Back to rules" (click)="goBack()">
+        <app-icon name="arrow-left"></app-icon>
+      </button>
+      <span class="ui-divider-v"></span>
+      <input class="rb-name-input" [(ngModel)]="rule.name" placeholder="Rule name" aria-label="Rule name" />
     </div>
 
     <div class="rb-toolbar-center">
-      <span class="rb-entity-label">Entity:</span>
-      <p-dropdown
-        [options]="entityTypeOptions"
-        [(ngModel)]="rule.entityType"
-        (ngModelChange)="onEntityTypeChange()"
-        optionLabel="label" optionValue="value"
-        styleClass="rb-entity-select" appendTo="body">
-      </p-dropdown>
+      <label class="rb-entity-label" for="rb-entity">Entity:</label>
+      <select id="rb-entity" class="ui-select rb-entity-select"
+              [(ngModel)]="rule.entityType" (ngModelChange)="onEntityTypeChange()">
+        @for (o of entityTypeOptions; track o.value) {
+          <option [ngValue]="o.value">{{ o.label }}</option>
+        }
+      </select>
     </div>
 
     <div class="rb-toolbar-right">
-      <p-button icon="pi pi-trash" label="Clear" styleClass="p-button-text p-button-secondary p-button-sm"
-                (onClick)="confirmClear()"></p-button>
-      <p-button icon="pi pi-play" label="Test" styleClass="p-button-outlined p-button-sm"
-                (onClick)="openTestDialog()"></p-button>
-      <p-button icon="pi pi-save" label="Save" styleClass="p-button-sm"
-                [loading]="saving" (onClick)="saveRule()"></p-button>
-      <p-inputSwitch [(ngModel)]="rule.isActive" pTooltip="Rule active"></p-inputSwitch>
+      <button type="button" class="ui-btn ui-btn--text ui-btn--secondary" (click)="confirmClear()">
+        <app-icon name="trash"></app-icon> Clear
+      </button>
+      <button type="button" class="ui-btn ui-btn--outlined" (click)="openTestDialog()">
+        <app-icon name="play"></app-icon> Test
+      </button>
+      <button type="button" class="ui-btn" [disabled]="saving" (click)="saveRule()">
+        <app-icon [name]="saving ? 'spinner' : 'save'"></app-icon> Save
+      </button>
+      <label class="ui-switch" title="Rule active">
+        <input type="checkbox" [(ngModel)]="rule.isActive" aria-label="Rule active" />
+        <span class="ui-switch__track"></span>
+      </label>
     </div>
   </div>
 
@@ -58,55 +74,88 @@
   </div>
 </div>
 
-<!-- ── Test Dialog ──────────────────────────────────────────────────────── -->
-<p-dialog header="Test Rule" [(visible)]="showTestDialog"
-          [modal]="true" [style]="{width: '680px'}" [draggable]="true">
-
-  <div class="test-scope-section">
-    <label class="test-label">Scope JSON (entity payload)</label>
-    <textarea pInputTextarea [(ngModel)]="testScope" [rows]="10"
-              class="test-scope-input w-full font-mono text-sm"
-              [class.p-invalid]="testScopeError">
-    </textarea>
-    @if (testScopeError) {
-      <small class="p-error">{{ testScopeError }}</small>
-    }
-  </div>
-
-  @if (showTestResults) {
-    <p-divider></p-divider>
-    <div class="test-results">
-      <h4 class="test-results-title">Execution Results</h4>
-      @for (result of testResults; track $index) {
-        <p-card styleClass="test-result-card mb-2">
-          <ng-template pTemplate="header">
-            <div class="test-result-header">
-              <span class="test-result-name">{{ $any(result).ruleName }}</span>
-              <p-tag
-                [value]="$any(result).outcome"
-                [severity]="$any(result).outcome === 'completed' ? 'success' : $any(result).outcome === 'failed' ? 'danger' : 'warning'">
-              </p-tag>
-            </div>
-          </ng-template>
-          <div class="test-result-body">
-            <span class="test-detail-label">Nodes executed:</span>
-            <span>{{ $any(result).nodesExecuted?.join(' → ') || '—' }}</span>
-          </div>
-          @if ($any(result).errorMessage) {
-            <p class="test-error">{{ $any(result).errorMessage }}</p>
-          }
-        </p-card>
-      }
-      @if (testResults.length === 0) {
-        <p class="test-no-results">No matching active rules found for this entity type.</p>
-      }
+<!-- ── Clear Confirmation ──────────────────────────────────────────────── -->
+@if (showClearConfirm) {
+  <div class="ui-backdrop" (click)="showClearConfirm = false">
+    <div class="ui-dialog ui-dialog--sm" role="alertdialog" aria-modal="true"
+         aria-labelledby="rb-clear-title" (click)="$event.stopPropagation()">
+      <div class="ui-dialog__header">
+        <h3 id="rb-clear-title">Confirmation</h3>
+      </div>
+      <div class="ui-dialog__body rb-confirm-body">
+        <app-icon name="exclamation-triangle" class="rb-confirm-icon"></app-icon>
+        <span>Clear all nodes and connections? This cannot be undone.</span>
+      </div>
+      <div class="ui-dialog__footer">
+        <button type="button" class="ui-btn ui-btn--text" (click)="showClearConfirm = false">No</button>
+        <button type="button" class="ui-btn ui-btn--danger" (click)="clearCanvas()">Yes, clear</button>
+      </div>
     </div>
-  }
+  </div>
+}
 
-  <ng-template pTemplate="footer">
-    <p-button label="Cancel" icon="pi pi-times" styleClass="p-button-text"
-              (onClick)="showTestDialog = false"></p-button>
-    <p-button label="Run Test" icon="pi pi-play"
-              [loading]="testing" (onClick)="runTest()"></p-button>
-  </ng-template>
-</p-dialog>
+<!-- ── Test Dialog ──────────────────────────────────────────────────────── -->
+@if (showTestDialog) {
+  <div class="ui-backdrop" (click)="showTestDialog = false">
+    <div class="ui-dialog" role="dialog" aria-modal="true" aria-labelledby="rb-test-title"
+         (click)="$event.stopPropagation()">
+      <div class="ui-dialog__header">
+        <h3 id="rb-test-title">Test Rule</h3>
+        <button type="button" class="ui-btn ui-btn--text ui-btn--icon" aria-label="Close"
+                (click)="showTestDialog = false">
+          <app-icon name="times"></app-icon>
+        </button>
+      </div>
+
+      <div class="ui-dialog__body">
+        <div class="test-scope-section">
+          <label class="test-label" for="rb-test-scope">Scope JSON (entity payload)</label>
+          <textarea id="rb-test-scope" class="ui-input test-scope-input" rows="10"
+                    [(ngModel)]="testScope" [class.ui-input--invalid]="testScopeError"></textarea>
+          @if (testScopeError) {
+            <small class="ui-error">{{ testScopeError }}</small>
+          }
+        </div>
+
+        @if (showTestResults) {
+          <hr class="ui-divider" />
+          <div class="test-results">
+            <h4 class="test-results-title">Execution Results</h4>
+            @for (result of testResults; track $index) {
+              <div class="ui-card test-result-card">
+                <div class="test-result-header">
+                  <span class="test-result-name">{{ $any(result).ruleName }}</span>
+                  <span class="ui-tag"
+                        [class.ui-tag--success]="$any(result).outcome === 'completed'"
+                        [class.ui-tag--danger]="$any(result).outcome === 'failed'"
+                        [class.ui-tag--warn]="$any(result).outcome !== 'completed' && $any(result).outcome !== 'failed'">
+                    {{ $any(result).outcome }}
+                  </span>
+                </div>
+                <div class="test-result-body">
+                  <span class="test-detail-label">Nodes executed:</span>
+                  <span>{{ $any(result).nodesExecuted?.join(' → ') || '—' }}</span>
+                </div>
+                @if ($any(result).errorMessage) {
+                  <p class="test-error">{{ $any(result).errorMessage }}</p>
+                }
+              </div>
+            }
+            @if (testResults.length === 0) {
+              <p class="test-no-results">No matching active rules found for this entity type.</p>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="ui-dialog__footer">
+        <button type="button" class="ui-btn ui-btn--text" (click)="showTestDialog = false">
+          <app-icon name="times"></app-icon> Cancel
+        </button>
+        <button type="button" class="ui-btn" [disabled]="testing" (click)="runTest()">
+          <app-icon [name]="testing ? 'spinner' : 'play'"></app-icon> Run Test
+        </button>
+      </div>
+    </div>
+  </div>
+}

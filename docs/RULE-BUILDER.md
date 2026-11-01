@@ -73,8 +73,13 @@ cd frontend && npm install && ng serve
 # Database (MySQL 8.0+): apply the schema scripts in order
 for f in database/mysql/0*.sql; do mysql -u <user> -p <database> < "$f"; done
 
-# Backend
+# Backend (MySQL connection via environment variables)
+export MYSQL_HOST=127.0.0.1 MYSQL_PORT=3306 MYSQL_USER=crm MYSQL_PASSWORD=... MYSQL_DATABASE=crm
+# or: export MYSQL_URL=mysql://crm:...@127.0.0.1:3306/crm
 cd backend && npm install && npm run build && npm start
 ```
+
+Without `MYSQL_URL` or `MYSQL_HOST` the backend falls back to an in-memory
+store (development only; data is lost on restart).
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for system design, [API.md](./API.md) for the REST endpoints and [SLA.md](./SLA.md) for SLA tracking.

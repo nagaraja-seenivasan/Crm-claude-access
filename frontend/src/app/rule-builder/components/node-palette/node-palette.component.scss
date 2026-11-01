@@ -24,7 +24,7 @@
   color: #1e293b;
   border-bottom: 1px solid #e2e8f0;
 
-  i { color: #6366f1; font-size: 1rem; }
+  app-icon { color: #6366f1; font-size: 1rem; }
 }
 
 .palette-section {
@@ -62,23 +62,23 @@
 
   &:active { cursor: grabbing; transform: scale(0.97); }
 
-  i { font-size: 0.85rem; flex-shrink: 0; }
+  app-icon { font-size: 0.85rem; flex-shrink: 0; }
 
   &--trigger {
     background: #f0fdf4;
-    i { color: var(--rb-node-trigger-accent); }
+    app-icon { color: var(--rb-node-trigger-accent); }
     &:hover { background: #dcfce7; border-color: var(--rb-node-trigger-accent); }
   }
 
   &--logic {
     background: #fffbeb;
-    i { color: var(--rb-node-condition-accent); }
+    app-icon { color: var(--rb-node-condition-accent); }
     &:hover { background: #fef3c7; border-color: var(--rb-node-condition-accent); }
   }
 
   &--action {
     background: #f5f3ff;
-    i { color: var(--rb-node-setvalue-accent); }
+    app-icon { color: var(--rb-node-setvalue-accent); }
     &:hover { background: #ede9fe; border-color: var(--rb-node-setvalue-accent); }
   }
 }
@@ -91,6 +91,6 @@
   gap: 6px;
   color: #94a3b8;
 
-  i { font-size: 0.75rem; margin-top: 2px; flex-shrink: 0; }
+  app-icon { font-size: 0.75rem; margin-top: 2px; flex-shrink: 0; }
   small { font-size: 0.7rem; line-height: 1.4; }
 }

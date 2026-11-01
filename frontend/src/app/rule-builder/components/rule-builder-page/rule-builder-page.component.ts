@@ -4,9 +4,10 @@ import {
   ViewChild,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
+  HostListener,
+  OnDestroy,
 } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {MessageService, ConfirmationService} from 'primeng/api';
 import {RuleCanvasComponent} from '../rule-canvas/rule-canvas.component';
 import {RuleBuilderService, ExecuteRuleRequest} from '../../services/rule-builder.service';
 import {
@@ -17,14 +18,19 @@ import {
   NotificationTemplate,
 } from '../../models/rule.models';
 
+interface Toast {
+  id: number;
+  severity: 'success' | 'error' | 'warn';
+  summary: string;
+}
+
 @Component({
   selector: 'app-rule-builder-page',
   templateUrl: './rule-builder-page.component.html',
   styleUrls: ['./rule-builder-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [MessageService, ConfirmationService],
 })
-export class RuleBuilderPageComponent implements OnInit {
+export class RuleBuilderPageComponent implements OnInit, OnDestroy {
   @ViewChild('canvas') canvas!: RuleCanvasComponent;
 
   rule: RuleDefinition = {
@@ -48,6 +54,10 @@ export class RuleBuilderPageComponent implements OnInit {
   testScope = '{\n  "id": "entity-123",\n  "status": "New",\n  "amount": 5000\n}';
   testResults: unknown[] = [];
   testScopeError = '';
+  showClearConfirm = false;
+  toasts: Toast[] = [];
+  private toastSeq = 0;
+  private readonly toastTimers = new Map<number, ReturnType<typeof setTimeout>>();
 
   readonly entityTypeOptions = [
     {label: 'Lead', value: 'Lead'},
@@ -60,8 +70,6 @@ export class RuleBuilderPageComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private ruleService: RuleBuilderService,
-    private messageService: MessageService,
-    private confirmationService: ConfirmationService,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -132,7 +140,8 @@ export class RuleBuilderPageComponent implements OnInit {
     this.saving = true;
     this.ruleService.saveRule(this.rule).subscribe({
       next: saved => {
-        this.rule.id = saved.id;
+        // POST returns the created rule; PATCH returns 204 with no body.
+        if (saved?.id) this.rule.id = saved.id;
         this.saving = false;
         this.toast('success', 'Rule saved successfully');
         this.cdr.markForCheck();
@@ -185,18 +194,43 @@ export class RuleBuilderPageComponent implements OnInit {
   }
 
   confirmClear(): void {
-    this.confirmationService.confirm({
-      message: 'Clear all nodes and connections? This cannot be undone.',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => this.canvas.clearCanvas(),
-    });
+    this.showClearConfirm = true;
+  }
+
+  clearCanvas(): void {
+    this.showClearConfirm = false;
+    this.canvas.clearCanvas();
+  }
+
+  @HostListener('document:keydown.escape')
+  closeDialogs(): void {
+    if (this.showTestDialog || this.showClearConfirm) {
+      this.showTestDialog = false;
+      this.showClearConfirm = false;
+      this.cdr.markForCheck();
+    }
   }
 
   goBack(): void {
     void this.router.navigate(['/rules']);
   }
 
-  private toast(severity: 'success' | 'error' | 'warn', summary: string): void {
-    this.messageService.add({severity, summary, life: 3000});
+  dismissToast(id: number): void {
+    clearTimeout(this.toastTimers.get(id));
+    this.toastTimers.delete(id);
+    this.toasts = this.toasts.filter(t => t.id !== id);
+    this.cdr.markForCheck();
+  }
+
+  ngOnDestroy(): void {
+    for (const timer of this.toastTimers.values()) clearTimeout(timer);
+    this.toastTimers.clear();
+  }
+
+  private toast(severity: Toast['severity'], summary: string): void {
+    const id = ++this.toastSeq;
+    this.toasts = [...this.toasts, {id, severity, summary}];
+    this.toastTimers.set(id, setTimeout(() => this.dismissToast(id), 3000));
+    this.cdr.markForCheck();
   }
 }

@@ -62,11 +62,19 @@
 }
 
 .rb-entity-select {
-  ::ng-deep .p-dropdown {
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    font-size: 0.82rem;
-  }
+  flex: 1;
+}
+
+.rb-confirm-body {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.88rem;
+}
+
+.rb-confirm-icon {
+  font-size: 1.6rem;
+  color: #f59e0b;
 }
 
 // ── Body ─────────────────────────────────────────────────────────────────────
@@ -92,6 +100,7 @@
 }
 
 .test-scope-input {
+  width: 100%;
   font-family: 'Fira Code', 'Consolas', monospace;
   font-size: 0.8rem;
   resize: vertical;
@@ -105,11 +114,15 @@
   margin: 0 0 10px;
 }
 
+.test-result-card {
+  margin-bottom: 8px;
+}
+
 .test-result-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px 0;
+  margin-bottom: 6px;
 }
 
 .test-result-name {
